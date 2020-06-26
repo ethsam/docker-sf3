@@ -62,12 +62,6 @@ services:
     volumes:
       - my-db:/var/lib/mysql
 
-  #adminer:
-  #  image: adminer
-  #  restart: always
-  #  ports:
-  #    - '9000:9000'
-
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     ports:
