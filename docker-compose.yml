@@ -1,0 +1,84 @@
+version: '2'  
+services:  
+  php:
+    build: ./docker/php/
+    environment:
+      TIMEZONE: Europe/Paris
+    volumes:
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./app:/var/www/app
+    working_dir: /var/www/app
+
+  webserver:
+    image: nginx:1.11
+    depends_on:
+      - php
+    volumes_from:
+      - php
+    volumes:
+      - ./docker/nginx/app.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - 8080:80
+
+  composer:
+    image: composer:1.4
+    volumes_from:
+      - php
+    working_dir: /var/www/app
+  
+#  db:
+#    image: mysql:5.7
+#    restart: always
+#    environment:
+#      MYSQL_DATABASE: 'erpwolfe'
+#      # So you don't have to use root, but you can if you like
+#      MYSQL_USER: 'root'
+#      # You can use whatever password you like
+#      MYSQL_PASSWORD: 'root'
+#      # Password for root access
+#      MYSQL_ROOT_PASSWORD: 'root'
+#    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+#      - '3306:3306'
+#    expose:
+#      # Opens port 3306 on the container
+#      - '3306'
+#      # Where our data will be persisted
+#    volumes:
+#      - my-db:/var/lib/mysql
+
+#volumes:
+#  my-db:
+
+  maria:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+    expose:
+      # Opens port 3306 on the container
+      - '3306'
+      # Where our data will be persisted
+    volumes:
+      - my-db:/var/lib/mysql
+
+  #adminer:
+  #  image: adminer
+  #  restart: always
+  #  ports:
+  #    - '9000:9000'
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - 8000:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mariadb
+    depends_on:
+      - maria
+    links:
+      - maria:my-db
+
+volumes:
+  my-db:
